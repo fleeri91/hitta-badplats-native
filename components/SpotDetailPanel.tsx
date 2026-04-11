@@ -6,6 +6,7 @@ import {
 } from '@/lib/queries'
 import { useMapFilterStore } from '@/store/useMapFilter'
 import { SmhiForecast } from '@/types/Smhi/SmhiForecast'
+import { WaterTypeId } from '@/types/BathingWater/WaterType'
 import { useEffect, useRef } from 'react'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import {
@@ -24,39 +25,17 @@ const PANEL_OFFSET = 500
 
 const qualityColor: Record<number, string> = {
   1: '#22c55e',
-  2: TailwindColors.blue['400'],
-  3: '#f97316',
+  2: TailwindColors.teal['500'],
+  3: TailwindColors.amber['400'],
   4: TailwindColors.red['500'],
 }
 
 const weatherEmoji: Record<number, string> = {
-  1: '☀️',
-  2: '🌤️',
-  3: '⛅',
-  4: '🌥️',
-  5: '☁️',
-  6: '☁️',
-  7: '🌫️',
-  8: '🌦️',
-  9: '🌦️',
-  10: '🌧️',
-  11: '⛈️',
-  12: '🌨️',
-  13: '🌨️',
-  14: '🌨️',
-  15: '🌨️',
-  16: '❄️',
-  17: '❄️',
-  18: '🌧️',
-  19: '🌧️',
-  20: '🌧️',
-  21: '⛈️',
-  22: '🌨️',
-  23: '🌨️',
-  24: '🌨️',
-  25: '❄️',
-  26: '❄️',
-  27: '❄️',
+  1: '☀️', 2: '🌤️', 3: '⛅', 4: '🌥️', 5: '☁️', 6: '☁️',
+  7: '🌫️', 8: '🌦️', 9: '🌦️', 10: '🌧️', 11: '⛈️',
+  12: '🌨️', 13: '🌨️', 14: '🌨️', 15: '🌨️', 16: '❄️', 17: '❄️',
+  18: '🌧️', 19: '🌧️', 20: '🌧️', 21: '⛈️',
+  22: '🌨️', 23: '🌨️', 24: '🌨️', 25: '❄️', 26: '❄️', 27: '❄️',
 }
 
 const TRANSPORT_MODES = [
@@ -84,8 +63,22 @@ function getCurrentForecast(timeSeries: SmhiForecast['timeSeries']) {
 }
 
 function formatSeasonDate(iso: string): string {
-  const date = new Date(iso)
-  return date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
+  return new Date(iso).toLocaleDateString('sv-SE', {
+    day: 'numeric',
+    month: 'short',
+  })
+}
+
+function waterAccentColor(waterTypeId: number): string {
+  return waterTypeId === WaterTypeId.HAV
+    ? TailwindColors.sky['500']
+    : TailwindColors.teal['500']
+}
+
+function waterAccentBg(waterTypeId: number): string {
+  return waterTypeId === WaterTypeId.HAV
+    ? TailwindColors.sky['50']
+    : TailwindColors.teal['50']
 }
 
 export default function SpotDetailPanel() {
@@ -137,6 +130,13 @@ export default function SpotDetailPanel() {
     profile?.algae ||
     profile?.cyano
 
+  const accentColor = selectedBathingWater
+    ? waterAccentColor(selectedBathingWater.waterTypeId)
+    : TailwindColors.sky['500']
+  const accentBg = selectedBathingWater
+    ? waterAccentBg(selectedBathingWater.waterTypeId)
+    : TailwindColors.sky['50']
+
   return (
     <Animated.View
       style={[
@@ -147,18 +147,32 @@ export default function SpotDetailPanel() {
       <ThemedView style={styles.panel}>
         <View style={styles.handle} />
 
+        {/* Header */}
         <View style={styles.header}>
-          <ThemedText style={styles.name} numberOfLines={1}>
-            {selectedBathingWater?.name ?? ''}
-          </ThemedText>
+          <View style={styles.headerLeft}>
+            <FontAwesome6
+              name="person-swimming"
+              size={14}
+              color={accentColor}
+              style={styles.headerIcon}
+            />
+            <ThemedText style={styles.name} numberOfLines={1}>
+              {selectedBathingWater?.name ?? ''}
+            </ThemedText>
+          </View>
           <TouchableOpacity onPress={() => setBathingWater(null)} hitSlop={12}>
-            <ThemedText style={styles.closeButton}>✕</ThemedText>
+            <FontAwesome6
+              name="xmark"
+              size={16}
+              color={TailwindColors.gray['400']}
+            />
           </TouchableOpacity>
         </View>
 
+        {/* Chips */}
         <View style={styles.chips}>
-          <View style={styles.chip}>
-            <ThemedText style={styles.chipText}>
+          <View style={[styles.chip, { backgroundColor: accentBg }]}>
+            <ThemedText style={[styles.chipText, { color: accentColor }]}>
               {selectedBathingWater?.waterTypeIdText ?? ''}
             </ThemedText>
           </View>
@@ -167,57 +181,76 @@ export default function SpotDetailPanel() {
               {selectedBathingWater?.municipality?.name ?? ''}
             </ThemedText>
           </View>
-        </View>
-
-        <View style={styles.infoRow}>
-          <View style={styles.infoBlock}>
-            {latestClassification && (
-              <View style={styles.qualityRow}>
-                <View
-                  style={[
-                    styles.qualityDot,
-                    {
-                      backgroundColor:
-                        qualityColor[latestClassification.qualityClassId] ??
-                        TailwindColors.gray['400'],
-                    },
-                  ]}
-                />
-                <ThemedText style={styles.qualityText}>
-                  {latestClassification.qualityClassIdText}{' '}
-                  <ThemedText style={styles.subtle}>
-                    ({latestClassification.year})
-                  </ThemedText>
-                </ThemedText>
-              </View>
-            )}
-
-            {profile?.bathingSeason && (
-              <ThemedText style={styles.subtle}>
-                Säsong {formatSeasonDate(profile.bathingSeason.startsAt)}
-                {' – '}
-                {formatSeasonDate(profile.bathingSeason.endsAt)}
+          {latestClassification && (
+            <View
+              style={[
+                styles.chip,
+                {
+                  backgroundColor:
+                    (qualityColor[latestClassification.qualityClassId] ?? TailwindColors.gray['400']) + '20',
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.qualityDot,
+                  {
+                    backgroundColor:
+                      qualityColor[latestClassification.qualityClassId] ??
+                      TailwindColors.gray['400'],
+                  },
+                ]}
+              />
+              <ThemedText
+                style={[
+                  styles.chipText,
+                  {
+                    color:
+                      qualityColor[latestClassification.qualityClassId] ??
+                      TailwindColors.gray['500'],
+                  },
+                ]}
+              >
+                {latestClassification.qualityClassIdText}
               </ThemedText>
-            )}
-          </View>
-
-          {temperature !== null && (
-            <View style={styles.weatherBlock}>
-              <ThemedText style={styles.weatherEmoji}>
-                {symbol !== null ? (weatherEmoji[symbol] ?? '🌡️') : '🌡️'}
-              </ThemedText>
-              <ThemedText style={styles.weatherTemp}>
-                {Math.round(temperature)}°
-              </ThemedText>
-              {windSpeed !== null && (
-                <ThemedText style={styles.subtle}>
-                  {windSpeed.toFixed(1)} m/s
-                </ThemedText>
-              )}
             </View>
           )}
         </View>
 
+        {/* Weather card */}
+        {temperature !== null && (
+          <View style={[styles.weatherCard, { backgroundColor: accentBg }]}>
+            <ThemedText style={styles.weatherEmoji}>
+              {symbol !== null ? (weatherEmoji[symbol] ?? '🌡️') : '🌡️'}
+            </ThemedText>
+            <View style={styles.weatherMain}>
+              <ThemedText style={[styles.weatherTemp, { color: accentColor }]}>
+                {Math.round(temperature)}°C
+              </ThemedText>
+              {profile?.bathingSeason && (
+                <ThemedText style={styles.weatherSub}>
+                  Säsong {formatSeasonDate(profile.bathingSeason.startsAt)}
+                  {' – '}
+                  {formatSeasonDate(profile.bathingSeason.endsAt)}
+                </ThemedText>
+              )}
+            </View>
+            {windSpeed !== null && (
+              <View style={styles.windBlock}>
+                <FontAwesome6
+                  name="wind"
+                  size={12}
+                  color={TailwindColors.gray['400']}
+                />
+                <ThemedText style={styles.windText}>
+                  {windSpeed.toFixed(1)} m/s
+                </ThemedText>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Directions */}
         {spotLat !== null && spotLon !== null && (
           <View style={styles.directionsRow}>
             {TRANSPORT_MODES.map((mode) => (
@@ -227,11 +260,12 @@ export default function SpotDetailPanel() {
                 onPress={() =>
                   openDirections(spotLat, spotLon, mode.iosDirFlg, mode.googleMode)
                 }
+                activeOpacity={0.7}
               >
                 <FontAwesome6
                   name={mode.icon}
-                  size={18}
-                  color={TailwindColors.blue['600']}
+                  size={16}
+                  color={TailwindColors.gray['600']}
                 />
                 <ThemedText style={styles.directionLabel}>
                   {mode.label}
@@ -241,25 +275,52 @@ export default function SpotDetailPanel() {
           </View>
         )}
 
+        {/* Warnings */}
         {hasWarnings && (
           <View style={styles.warnings}>
             {advisory?.adviceAgainstBathing?.map((a) => (
-              <ThemedText key={a.typeIdText} style={styles.warningText}>
-                ⚠ {a.typeIdText}
-              </ThemedText>
+              <View key={a.typeIdText} style={styles.warningRow}>
+                <FontAwesome6
+                  name="triangle-exclamation"
+                  size={12}
+                  color={TailwindColors.red['500']}
+                />
+                <ThemedText style={styles.warningText}>{a.typeIdText}</ThemedText>
+              </View>
             ))}
             {advisory?.abnormalSituations?.map((a) => (
-              <ThemedText key={a.description} style={styles.warningText}>
-                ⚠ {a.description}
-              </ThemedText>
+              <View key={a.description} style={styles.warningRow}>
+                <FontAwesome6
+                  name="triangle-exclamation"
+                  size={12}
+                  color={TailwindColors.red['500']}
+                />
+                <ThemedText style={styles.warningText}>{a.description}</ThemedText>
+              </View>
             ))}
             {profile?.algae && (
-              <ThemedText style={styles.warningText}>⚠ Alger</ThemedText>
+              <View style={styles.warningRow}>
+                <FontAwesome6
+                  name="triangle-exclamation"
+                  size={12}
+                  color={TailwindColors.amber['500']}
+                />
+                <ThemedText style={[styles.warningText, { color: TailwindColors.amber['700'] }]}>
+                  Alger
+                </ThemedText>
+              </View>
             )}
             {profile?.cyano && (
-              <ThemedText style={styles.warningText}>
-                ⚠ Cyanobakterier
-              </ThemedText>
+              <View style={styles.warningRow}>
+                <FontAwesome6
+                  name="triangle-exclamation"
+                  size={12}
+                  color={TailwindColors.amber['500']}
+                />
+                <ThemedText style={[styles.warningText, { color: TailwindColors.amber['700'] }]}>
+                  Cyanobakterier
+                </ThemedText>
+              </View>
             )}
           </View>
         )}
@@ -277,21 +338,21 @@ const styles = StyleSheet.create({
   },
   panel: {
     marginHorizontal: 12,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowRadius: 12,
+    elevation: 10,
   },
   handle: {
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: TailwindColors.gray['300'],
+    backgroundColor: TailwindColors.gray['200'],
     alignSelf: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   header: {
     flexDirection: 'row',
@@ -299,69 +360,77 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 10,
   },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
     marginRight: 8,
   },
-  closeButton: {
-    fontSize: 16,
-    color: TailwindColors.gray['400'],
+  headerIcon: {
+    marginRight: 8,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: '700',
+    flex: 1,
   },
   chips: {
     flexDirection: 'row',
     gap: 6,
     marginBottom: 12,
+    flexWrap: 'wrap',
   },
   chip: {
-    backgroundColor: TailwindColors.blue['50'],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: TailwindColors.gray['100'],
     borderRadius: 20,
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
   },
   chipText: {
     fontSize: 12,
-    color: TailwindColors.blue['700'],
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 10,
-  },
-  infoBlock: {
-    flex: 1,
-    gap: 6,
-  },
-  qualityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    fontWeight: '500',
+    color: TailwindColors.gray['600'],
   },
   qualityDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
   },
-  qualityText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  subtle: {
-    fontSize: 13,
-    color: TailwindColors.gray['500'],
-  },
-  weatherBlock: {
+  weatherCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 10,
+    gap: 12,
   },
   weatherEmoji: {
-    fontSize: 28,
+    fontSize: 32,
+  },
+  weatherMain: {
+    flex: 1,
+    gap: 2,
   },
   weatherTemp: {
-    fontSize: 22,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  weatherSub: {
+    fontSize: 12,
+    color: TailwindColors.gray['500'],
+  },
+  windBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  windText: {
+    fontSize: 13,
+    color: TailwindColors.gray['500'],
   },
   directionsRow: {
     flexDirection: 'row',
@@ -371,23 +440,30 @@ const styles = StyleSheet.create({
   directionButton: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: TailwindColors.blue['50'],
+    gap: 5,
+    backgroundColor: TailwindColors.gray['100'],
     borderRadius: 12,
     paddingVertical: 10,
   },
   directionLabel: {
     fontSize: 11,
-    color: TailwindColors.blue['600'],
+    fontWeight: '500',
+    color: TailwindColors.gray['600'],
   },
   warnings: {
-    gap: 4,
+    gap: 6,
     borderTopWidth: 1,
-    borderTopColor: TailwindColors.red['100'],
+    borderTopColor: TailwindColors.gray['100'],
     paddingTop: 10,
+  },
+  warningRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
   },
   warningText: {
     fontSize: 13,
     color: TailwindColors.red['500'],
+    flex: 1,
   },
 })

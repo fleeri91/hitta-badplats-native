@@ -1,9 +1,17 @@
 // components/BathingWaterMarker.tsx
 import { TailwindColors } from '@/constants/tailwindColors'
 import { BathingWater } from '@/types/BathingWater/BathingWaters'
+import { WaterTypeId } from '@/types/BathingWater/WaterType'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { StyleSheet, View } from 'react-native'
 import { Marker } from 'react-native-maps'
+
+function markerColor(waterTypeId: number, selected: boolean): string {
+  if (selected) return TailwindColors.sky['700']
+  return waterTypeId === WaterTypeId.HAV
+    ? TailwindColors.sky['500']
+    : TailwindColors.teal['500']
+}
 
 type Props = {
   water: BathingWater
@@ -25,7 +33,10 @@ export default function BathingWaterMarker({
 
   const size = Math.max(16, Math.min(40, zoomLevel * 2.5))
   const outerSize = selected ? size * 1.25 : size
-  const innerColor = selected ? TailwindColors.blue['700'] : TailwindColors.blue['500']
+  const innerColor = markerColor(water.waterTypeId, selected)
+  const borderColor = selected
+    ? (water.waterTypeId === WaterTypeId.HAV ? TailwindColors.sky['300'] : TailwindColors.teal['300'])
+    : 'rgba(0,0,0,0.1)'
 
   return (
     <Marker
@@ -40,7 +51,7 @@ export default function BathingWaterMarker({
               width: outerSize,
               height: outerSize,
               borderRadius: outerSize / 2,
-              borderColor: selected ? TailwindColors.blue['300'] : 'rgba(0,0,0,0.1)',
+              borderColor,
               borderWidth: selected ? 2 : 1,
             },
           ]}
