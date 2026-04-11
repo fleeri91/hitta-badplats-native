@@ -3,7 +3,9 @@ import MapView, { Region } from 'react-native-maps'
 
 import BathingWaterMarker from '@/components/BathingWaterMarker'
 import SpotDetailPanel from '@/components/SpotDetailPanel'
+import SpotListView from '@/components/SpotListView'
 import { ThemedView } from '@/components/themed-view'
+import ViewToggleButton from '@/components/ViewToggleButton'
 import { useAutoMunicipality } from '@/hooks/useAutoMunicipality'
 import { useFilteredBathingWaters } from '@/hooks/useFilteredBathingWaters'
 import { useFitMapToCoordinates } from '@/hooks/useFitMapToCoordinates'
@@ -22,7 +24,7 @@ export default function HomeScreen() {
   const { data } = useBathingWaters()
 
   const { geolocation } = useGeolocationStore()
-  const { view } = useViewNavigationStore()
+  const { view, setView } = useViewNavigationStore()
   const { setBathingWater, municipality, selectedBathingWater } =
     useMapFilterStore()
 
@@ -47,27 +49,39 @@ export default function HomeScreen() {
     setBathingWater(water)
   }
 
+  const handleListSelect = (water: BathingWater) => {
+    setBathingWater(water)
+    setView('map')
+  }
+
   return (
     <ThemedView style={styles.container}>
-      <MapView
-        ref={mapRef}
-        onMapReady={() => setIsMapReady(true)}
-        style={StyleSheet.absoluteFillObject}
-        showsUserLocation={!!geolocation}
-        onRegionChangeComplete={handleRegionChangeComplete}
-      >
-        {isMapReady &&
-          filteredWaters.map((water) => (
-            <BathingWaterMarker
-              key={water.id}
-              water={water}
-              zoomLevel={zoomLevel}
-              selected={selectedBathingWater?.id === water.id}
-              onSelect={handleMarkerSelect}
-            />
-          ))}
-      </MapView>
-      <SpotDetailPanel />
+      {view === 'map' ? (
+        <>
+          <MapView
+            ref={mapRef}
+            onMapReady={() => setIsMapReady(true)}
+            style={StyleSheet.absoluteFillObject}
+            showsUserLocation={!!geolocation}
+            onRegionChangeComplete={handleRegionChangeComplete}
+          >
+            {isMapReady &&
+              filteredWaters.map((water) => (
+                <BathingWaterMarker
+                  key={water.id}
+                  water={water}
+                  zoomLevel={zoomLevel}
+                  selected={selectedBathingWater?.id === water.id}
+                  onSelect={handleMarkerSelect}
+                />
+              ))}
+          </MapView>
+          <SpotDetailPanel />
+        </>
+      ) : (
+        <SpotListView waters={filteredWaters} onSelect={handleListSelect} />
+      )}
+      <ViewToggleButton />
     </ThemedView>
   )
 }
