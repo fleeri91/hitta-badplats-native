@@ -1,11 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { getBathingWaterProfile, getBathingWaters, getSmhiForecast } from './api'
+import {
+  getBathingWaterProfile,
+  getBathingWaters,
+  getSmhiForecast,
+} from './api'
 
 export const queryKeys = {
   bathingWaters: ['bathingWaters'],
   bathingWaterProfile: (id: string) => ['bathingWaterProfile', id],
-  smhiForecast: (lat: number | null, lon: number | null) => ['smhiForecast', lat, lon],
+  smhiForecast: (lat: number | null, lon: number | null) => [
+    'smhiForecast',
+    lat,
+    lon,
+  ],
 }
 
 export const useBathingWaters = () => {

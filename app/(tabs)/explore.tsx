@@ -43,9 +43,7 @@ export default function ExploreScreen() {
   const [search, setSearch] = useState('')
 
   const filtered = search.trim()
-    ? sorted.filter((m) =>
-        m.toLowerCase().includes(search.toLowerCase())
-      )
+    ? sorted.filter((m) => m.toLowerCase().includes(search.toLowerCase()))
     : sorted
 
   const Header = (
@@ -88,10 +86,7 @@ export default function ExploreScreen() {
           </View>
 
           <TouchableOpacity
-            style={[
-              styles.gpsButton,
-              loading && styles.gpsButtonDisabled,
-            ]}
+            style={[styles.gpsButton, loading && styles.gpsButtonDisabled]}
             onPress={getCurrentLocation}
             disabled={loading}
             activeOpacity={0.8}
@@ -99,7 +94,9 @@ export default function ExploreScreen() {
             <FontAwesome6
               name="rotate"
               size={13}
-              color={loading ? TailwindColors.gray['400'] : TailwindColors.sky['600']}
+              color={
+                loading ? TailwindColors.gray['400'] : TailwindColors.sky['600']
+              }
             />
             <ThemedText
               style={[styles.gpsLabel, loading && styles.gpsLabelDisabled]}
@@ -162,7 +159,9 @@ export default function ExploreScreen() {
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={Header}
         ListFooterComponent={filtered.length > 0 ? Footer : null}
-        ListEmptyComponent={search.trim() ? <EmptyState query={search} /> : null}
+        ListEmptyComponent={
+          search.trim() ? <EmptyState query={search} /> : null
+        }
         getItemLayout={(_, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
@@ -177,10 +176,7 @@ export default function ExploreScreen() {
               activeOpacity={0.6}
             >
               <ThemedText
-                style={[
-                  styles.itemText,
-                  isSelected && styles.itemTextSelected,
-                ]}
+                style={[styles.itemText, isSelected && styles.itemTextSelected]}
               >
                 {item}
               </ThemedText>

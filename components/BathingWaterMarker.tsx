@@ -35,7 +35,9 @@ export default function BathingWaterMarker({
   const outerSize = selected ? size * 1.25 : size
   const innerColor = markerColor(water.waterTypeId, selected)
   const borderColor = selected
-    ? (water.waterTypeId === WaterTypeId.HAV ? TailwindColors.sky['300'] : TailwindColors.teal['300'])
+    ? water.waterTypeId === WaterTypeId.HAV
+      ? TailwindColors.sky['300']
+      : TailwindColors.teal['300']
     : 'rgba(0,0,0,0.1)'
 
   return (

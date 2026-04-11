@@ -31,21 +31,58 @@ const qualityColor: Record<number, string> = {
 }
 
 const weatherEmoji: Record<number, string> = {
-  1: '☀️', 2: '🌤️', 3: '⛅', 4: '🌥️', 5: '☁️', 6: '☁️',
-  7: '🌫️', 8: '🌦️', 9: '🌦️', 10: '🌧️', 11: '⛈️',
-  12: '🌨️', 13: '🌨️', 14: '🌨️', 15: '🌨️', 16: '❄️', 17: '❄️',
-  18: '🌧️', 19: '🌧️', 20: '🌧️', 21: '⛈️',
-  22: '🌨️', 23: '🌨️', 24: '🌨️', 25: '❄️', 26: '❄️', 27: '❄️',
+  1: '☀️',
+  2: '🌤️',
+  3: '⛅',
+  4: '🌥️',
+  5: '☁️',
+  6: '☁️',
+  7: '🌫️',
+  8: '🌦️',
+  9: '🌦️',
+  10: '🌧️',
+  11: '⛈️',
+  12: '🌨️',
+  13: '🌨️',
+  14: '🌨️',
+  15: '🌨️',
+  16: '❄️',
+  17: '❄️',
+  18: '🌧️',
+  19: '🌧️',
+  20: '🌧️',
+  21: '⛈️',
+  22: '🌨️',
+  23: '🌨️',
+  24: '🌨️',
+  25: '❄️',
+  26: '❄️',
+  27: '❄️',
 }
 
 const TRANSPORT_MODES = [
   { label: 'Bil', icon: 'car-side' as const, iosDirFlg: 'd', googleMode: 'd' },
-  { label: 'Gång', icon: 'person-walking' as const, iosDirFlg: 'w', googleMode: 'w' },
-  { label: 'Cykel', icon: 'person-biking' as const, iosDirFlg: 'b', googleMode: 'b' },
+  {
+    label: 'Gång',
+    icon: 'person-walking' as const,
+    iosDirFlg: 'w',
+    googleMode: 'w',
+  },
+  {
+    label: 'Cykel',
+    icon: 'person-biking' as const,
+    iosDirFlg: 'b',
+    googleMode: 'b',
+  },
   { label: 'Buss', icon: 'bus' as const, iosDirFlg: 'r', googleMode: 'r' },
 ]
 
-function openDirections(lat: number, lon: number, iosDirFlg: string, googleMode: string) {
+function openDirections(
+  lat: number,
+  lon: number,
+  iosDirFlg: string,
+  googleMode: string
+) {
   const url = Platform.select({
     ios: `maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=${iosDirFlg}`,
     default: `https://maps.google.com/maps?daddr=${lat},${lon}&dirflg=${googleMode}`,
@@ -187,7 +224,8 @@ export default function SpotDetailPanel() {
                 styles.chip,
                 {
                   backgroundColor:
-                    (qualityColor[latestClassification.qualityClassId] ?? TailwindColors.gray['400']) + '20',
+                    (qualityColor[latestClassification.qualityClassId] ??
+                      TailwindColors.gray['400']) + '20',
                 },
               ]}
             >
@@ -258,7 +296,12 @@ export default function SpotDetailPanel() {
                 key={mode.label}
                 style={styles.directionButton}
                 onPress={() =>
-                  openDirections(spotLat, spotLon, mode.iosDirFlg, mode.googleMode)
+                  openDirections(
+                    spotLat,
+                    spotLon,
+                    mode.iosDirFlg,
+                    mode.googleMode
+                  )
                 }
                 activeOpacity={0.7}
               >
@@ -285,7 +328,9 @@ export default function SpotDetailPanel() {
                   size={12}
                   color={TailwindColors.red['500']}
                 />
-                <ThemedText style={styles.warningText}>{a.typeIdText}</ThemedText>
+                <ThemedText style={styles.warningText}>
+                  {a.typeIdText}
+                </ThemedText>
               </View>
             ))}
             {advisory?.abnormalSituations?.map((a) => (
@@ -295,7 +340,9 @@ export default function SpotDetailPanel() {
                   size={12}
                   color={TailwindColors.red['500']}
                 />
-                <ThemedText style={styles.warningText}>{a.description}</ThemedText>
+                <ThemedText style={styles.warningText}>
+                  {a.description}
+                </ThemedText>
               </View>
             ))}
             {profile?.algae && (
@@ -305,7 +352,12 @@ export default function SpotDetailPanel() {
                   size={12}
                   color={TailwindColors.amber['500']}
                 />
-                <ThemedText style={[styles.warningText, { color: TailwindColors.amber['700'] }]}>
+                <ThemedText
+                  style={[
+                    styles.warningText,
+                    { color: TailwindColors.amber['700'] },
+                  ]}
+                >
                   Alger
                 </ThemedText>
               </View>
@@ -317,7 +369,12 @@ export default function SpotDetailPanel() {
                   size={12}
                   color={TailwindColors.amber['500']}
                 />
-                <ThemedText style={[styles.warningText, { color: TailwindColors.amber['700'] }]}>
+                <ThemedText
+                  style={[
+                    styles.warningText,
+                    { color: TailwindColors.amber['700'] },
+                  ]}
+                >
                   Cyanobakterier
                 </ThemedText>
               </View>
