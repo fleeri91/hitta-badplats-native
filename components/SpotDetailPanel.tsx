@@ -71,7 +71,7 @@ function openDirections(lat: number, lon: number, iosDirFlg: string, googleMode:
     ios: `maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=${iosDirFlg}`,
     default: `https://maps.google.com/maps?daddr=${lat},${lon}&dirflg=${googleMode}`,
   })
-  if (url) Linking.openURL(url)
+  if (url) Linking.openURL(url).catch(console.error)
 }
 
 function getCurrentForecast(timeSeries: SmhiForecast['timeSeries']) {
@@ -243,13 +243,13 @@ export default function SpotDetailPanel() {
 
         {hasWarnings && (
           <View style={styles.warnings}>
-            {advisory?.adviceAgainstBathing?.map((a, i) => (
-              <ThemedText key={i} style={styles.warningText}>
+            {advisory?.adviceAgainstBathing?.map((a) => (
+              <ThemedText key={a.typeIdText} style={styles.warningText}>
                 ⚠ {a.typeIdText}
               </ThemedText>
             ))}
-            {advisory?.abnormalSituations?.map((a, i) => (
-              <ThemedText key={i} style={styles.warningText}>
+            {advisory?.abnormalSituations?.map((a) => (
+              <ThemedText key={a.description} style={styles.warningText}>
                 ⚠ {a.description}
               </ThemedText>
             ))}

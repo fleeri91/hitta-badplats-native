@@ -1,13 +1,13 @@
 import { create } from 'zustand'
 
-type view = 'map' | 'list'
+type View = 'map' | 'list'
 
 type ViewNavigationState = {
-  view: view
+  view: View
 }
 
 type ViewNavigationActions = {
-  setView: (view: view) => void
+  setView: (view: View) => void
 }
 
 const initialState: ViewNavigationState = {
@@ -18,5 +18,5 @@ export const useViewNavigationStore = create<
   ViewNavigationState & ViewNavigationActions
 >((set) => ({
   ...initialState,
-  setView: (view: view) => set((state) => ({ ...state, view: view })),
+  setView: (view) => set({ view }),
 }))

@@ -2,7 +2,7 @@ import { MunicipalityName } from '@/constants/municipalities'
 import { BathingWater } from '@/types/BathingWater/BathingWaters'
 import { jsonStorage } from '@/lib/storage'
 import { create } from 'zustand'
-import { persist, PersistOptions } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 
 export type MapFilterState = {
   municipality: MunicipalityName | null
@@ -33,19 +33,14 @@ export const useMapFilterStore = create<MapFilterStore>()(
     {
       name: 'mapfilter-storage',
       storage: jsonStorage,
-      partialize: (state: MapFilterStore): MapFilterState => ({
-        ...initialState,
+      partialize: (state: MapFilterStore) => ({
         municipality: state.municipality,
       }),
-      onRehydrateStorage: () => (state, error: Error | undefined) => {
+      onRehydrateStorage: () => (_state, error) => {
         if (error) {
-          console.error('Error rehydrating map filter store:', {
-            error: error.message,
-            stack: error.stack,
-            state,
-          })
+          console.error('Error rehydrating map filter store:', error)
         }
       },
-    } as PersistOptions<MapFilterStore, MapFilterState>
+    }
   )
 )

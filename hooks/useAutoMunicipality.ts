@@ -1,4 +1,4 @@
-import { MunicipalityName } from '@/constants/municipalities'
+import { municipalities, MunicipalityName } from '@/constants/municipalities'
 import { getDistanceInKm } from '@/lib/helpers'
 import { useBathingWaters } from '@/lib/queries'
 import { useGeolocationStore } from '@/store/useGeolocation'
@@ -16,7 +16,7 @@ export function useAutoMunicipality() {
     const { latitude, longitude } = geolocation.coords
     const waters = data.watersAndAdvisories.map((w) => w.bathingWater)
 
-    let nearestMunicipality: string | null = null
+    let nearestName: string | null = null
     let minDist = Infinity
 
     for (const water of waters) {
@@ -27,12 +27,15 @@ export function useAutoMunicipality() {
       const dist = getDistanceInKm(latitude, longitude, lat, lon)
       if (dist < minDist) {
         minDist = dist
-        nearestMunicipality = water.municipality?.name ?? null
+        nearestName = water.municipality?.name ?? null
       }
     }
 
-    if (nearestMunicipality) {
-      setMunicipality(nearestMunicipality as MunicipalityName)
+    const match = municipalities.find(
+      (m) => m.toLowerCase() === nearestName?.toLowerCase()
+    )
+    if (match) {
+      setMunicipality(match as MunicipalityName)
     }
   }, [geolocation, data])
 }

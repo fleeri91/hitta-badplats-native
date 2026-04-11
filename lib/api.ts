@@ -1,4 +1,3 @@
-import { BathingWaterApiStatus } from '@/types/BathingWater/BathingWaterApiStatus'
 import { BathingWaterProfile } from '@/types/BathingWater/BathingWaterProfile'
 import { BathingWaters } from '@/types/BathingWater/BathingWaters'
 import { SmhiForecast } from '@/types/Smhi/SmhiForecast'
@@ -21,20 +20,6 @@ export const getSmhiForecast = async (
   const data: SmhiForecast = await response.json()
   return data
 }
-
-export const getBathingWaterApiStatus =
-  async (): Promise<BathingWaterApiStatus> => {
-    const response = await fetch(
-      `${process.env.EXPO_PUBLIC_HAV_API_URL}/operations/health-checks/readiness`
-    )
-
-    if (!response.ok) {
-      throw new Error(`Network response was not ok: ${response.statusText}`)
-    }
-
-    const data: BathingWaterApiStatus = await response.json()
-    return data
-  }
 
 export const getBathingWaters = async (): Promise<BathingWaters> => {
   const response = await fetch(

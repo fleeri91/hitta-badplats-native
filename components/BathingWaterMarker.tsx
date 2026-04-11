@@ -24,19 +24,8 @@ export default function BathingWaterMarker({
   if (isNaN(latitude) || isNaN(longitude)) return null
 
   const size = Math.max(16, Math.min(40, zoomLevel * 2.5))
-
-  /*
-  const getColorByWaterType = (waterType: WaterTypeId) => {
-    switch (waterType) {
-      case 1: // Sea
-        return '#007AFF'
-      case 3: // Lake
-        return '#4ABDAC'
-      default:
-        return '#FF3B30'
-    }
-  }
-  */
+  const outerSize = selected ? size * 1.25 : size
+  const innerColor = selected ? TailwindColors.blue['700'] : TailwindColors.blue['500']
 
   return (
     <Marker
@@ -48,10 +37,11 @@ export default function BathingWaterMarker({
           style={[
             styles.markerOuter,
             {
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-              backgroundColor: 'white',
+              width: outerSize,
+              height: outerSize,
+              borderRadius: outerSize / 2,
+              borderColor: selected ? TailwindColors.blue['300'] : 'rgba(0,0,0,0.1)',
+              borderWidth: selected ? 2 : 1,
             },
           ]}
         >
@@ -59,16 +49,16 @@ export default function BathingWaterMarker({
             style={[
               styles.markerInner,
               {
-                width: size * 0.825,
-                height: size * 0.825,
-                borderRadius: (size * 0.825) / 2,
-                backgroundColor: TailwindColors.blue['500'],
+                width: outerSize * 0.825,
+                height: outerSize * 0.825,
+                borderRadius: (outerSize * 0.825) / 2,
+                backgroundColor: innerColor,
               },
             ]}
           >
             <FontAwesome6
               name="person-swimming"
-              size={size * 0.5}
+              size={outerSize * 0.5}
               color="white"
             />
           </View>

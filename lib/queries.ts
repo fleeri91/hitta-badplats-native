@@ -5,7 +5,7 @@ import { getBathingWaterProfile, getBathingWaters, getSmhiForecast } from './api
 export const queryKeys = {
   bathingWaters: ['bathingWaters'],
   bathingWaterProfile: (id: string) => ['bathingWaterProfile', id],
-  smhiForecast: (lat: number, lon: number) => ['smhiForecast', lat, lon],
+  smhiForecast: (lat: number | null, lon: number | null) => ['smhiForecast', lat, lon],
 }
 
 export const useBathingWaters = () => {
@@ -13,7 +13,6 @@ export const useBathingWaters = () => {
     queryKey: queryKeys.bathingWaters,
     queryFn: getBathingWaters,
     staleTime: 1000 * 60 * 60 * 24,
-    refetchInterval: 1000 * 30,
   })
 }
 
@@ -27,7 +26,7 @@ export const useBathingWaterProfile = (id: string) => {
 
 export const useSmhiForecast = (lat: number | null, lon: number | null) => {
   return useQuery({
-    queryKey: queryKeys.smhiForecast(lat ?? 0, lon ?? 0),
+    queryKey: queryKeys.smhiForecast(lat, lon),
     queryFn: () => getSmhiForecast(lat!, lon!),
     enabled: lat !== null && lon !== null,
     staleTime: 1000 * 60 * 30,
