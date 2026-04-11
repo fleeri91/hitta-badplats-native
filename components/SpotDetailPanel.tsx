@@ -7,7 +7,15 @@ import {
 import { useMapFilterStore } from '@/store/useMapFilter'
 import { SmhiForecast } from '@/types/Smhi/SmhiForecast'
 import { useEffect, useRef } from 'react'
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import {
+  Animated,
+  Linking,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ThemedText } from './themed-text'
 import { ThemedView } from './themed-view'
@@ -49,6 +57,21 @@ const weatherEmoji: Record<number, string> = {
   25: '❄️',
   26: '❄️',
   27: '❄️',
+}
+
+const TRANSPORT_MODES = [
+  { label: 'Bil', icon: 'car-side' as const, iosDirFlg: 'd', googleMode: 'd' },
+  { label: 'Gång', icon: 'person-walking' as const, iosDirFlg: 'w', googleMode: 'w' },
+  { label: 'Cykel', icon: 'person-biking' as const, iosDirFlg: 'b', googleMode: 'b' },
+  { label: 'Buss', icon: 'bus' as const, iosDirFlg: 'r', googleMode: 'r' },
+]
+
+function openDirections(lat: number, lon: number, iosDirFlg: string, googleMode: string) {
+  const url = Platform.select({
+    ios: `maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=${iosDirFlg}`,
+    default: `https://maps.google.com/maps?daddr=${lat},${lon}&dirflg=${googleMode}`,
+  })
+  if (url) Linking.openURL(url)
 }
 
 function getCurrentForecast(timeSeries: SmhiForecast['timeSeries']) {
@@ -195,6 +218,29 @@ export default function SpotDetailPanel() {
           )}
         </View>
 
+        {spotLat !== null && spotLon !== null && (
+          <View style={styles.directionsRow}>
+            {TRANSPORT_MODES.map((mode) => (
+              <TouchableOpacity
+                key={mode.label}
+                style={styles.directionButton}
+                onPress={() =>
+                  openDirections(spotLat, spotLon, mode.iosDirFlg, mode.googleMode)
+                }
+              >
+                <FontAwesome6
+                  name={mode.icon}
+                  size={18}
+                  color={TailwindColors.blue['600']}
+                />
+                <ThemedText style={styles.directionLabel}>
+                  {mode.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         {hasWarnings && (
           <View style={styles.warnings}>
             {advisory?.adviceAgainstBathing?.map((a, i) => (
@@ -316,6 +362,23 @@ const styles = StyleSheet.create({
   weatherTemp: {
     fontSize: 22,
     fontWeight: '600',
+  },
+  directionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 10,
+  },
+  directionButton: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: TailwindColors.blue['50'],
+    borderRadius: 12,
+    paddingVertical: 10,
+  },
+  directionLabel: {
+    fontSize: 11,
+    color: TailwindColors.blue['600'],
   },
   warnings: {
     gap: 4,
