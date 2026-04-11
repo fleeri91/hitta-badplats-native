@@ -4,7 +4,7 @@ import { getBathingWaterProfile, getBathingWaters } from './api'
 
 export const queryKeys = {
   bathingWaters: ['bathingWaters'],
-  bathingWaterProfile: ['bathingWaterProfile'],
+  bathingWaterProfile: (id: string) => ['bathingWaterProfile', id],
 }
 
 export const useBathingWaters = () => {
@@ -18,7 +18,8 @@ export const useBathingWaters = () => {
 
 export const useBathingWaterProfile = (id: string) => {
   return useQuery({
-    queryKey: queryKeys.bathingWaterProfile,
+    queryKey: queryKeys.bathingWaterProfile(id),
     queryFn: () => getBathingWaterProfile(id),
+    enabled: !!id,
   })
 }

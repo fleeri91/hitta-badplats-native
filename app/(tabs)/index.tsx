@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native'
 import MapView, { Region } from 'react-native-maps'
 
 import BathingWaterMarker from '@/components/BathingWaterMarker'
+import SpotDetailPanel from '@/components/SpotDetailPanel'
 import { ThemedView } from '@/components/themed-view'
 import { useAutoMunicipality } from '@/hooks/useAutoMunicipality'
 import { useFilteredBathingWaters } from '@/hooks/useFilteredBathingWaters'
@@ -66,6 +67,7 @@ export default function HomeScreen() {
             />
           ))}
       </MapView>
+      <SpotDetailPanel />
     </ThemedView>
   )
 }
