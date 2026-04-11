@@ -15,20 +15,36 @@ export default function TabLayout() {
     getCurrentLocation()
   }, [])
 
+  const scheme = colorScheme ?? 'light'
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[scheme].tint,
+        tabBarInactiveTintColor: Colors[scheme].tabIconDefault,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: Colors[scheme].background,
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '500',
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Karta',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={26} name="map.fill" color={color} />
           ),
         }}
       />

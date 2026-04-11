@@ -1,5 +1,7 @@
 import { TailwindColors } from '@/constants/tailwindColors'
+import { Colors } from '@/constants/theme'
 import { municipalities, MunicipalityName } from '@/constants/municipalities'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useGeolocationStore } from '@/store/useGeolocation'
 import { useMapFilterStore } from '@/store/useMapFilter'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
@@ -39,6 +41,7 @@ export default function ExploreScreen() {
   const { municipality, setMunicipality } = useMapFilterStore()
   const { getCurrentLocation, loading } = useGeolocationStore()
   const { top, bottom } = useSafeAreaInsets()
+  const colorScheme = useColorScheme() ?? 'light'
 
   const [search, setSearch] = useState('')
 
@@ -117,7 +120,7 @@ export default function ExploreScreen() {
             color={TailwindColors.gray['400']}
           />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: Colors[colorScheme].text }]}
             placeholder={`Sök bland ${municipalities.length} kommuner…`}
             placeholderTextColor={TailwindColors.gray['400']}
             value={search}
