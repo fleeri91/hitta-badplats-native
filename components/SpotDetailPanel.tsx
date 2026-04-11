@@ -1,25 +1,63 @@
 import { TailwindColors } from '@/constants/tailwindColors'
-import { useBathingWaterProfile, useBathingWaters } from '@/lib/queries'
-import { useMapFilterStore } from '@/store/useMapFilter'
-import { useEffect, useRef } from 'react'
 import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+  useBathingWaterProfile,
+  useBathingWaters,
+  useSmhiForecast,
+} from '@/lib/queries'
+import { useMapFilterStore } from '@/store/useMapFilter'
+import { SmhiForecast } from '@/types/Smhi/SmhiForecast'
+import { useEffect, useRef } from 'react'
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ThemedText } from './themed-text'
 import { ThemedView } from './themed-view'
 
-const PANEL_HEIGHT = 260
+const PANEL_OFFSET = 500
 
 const qualityColor: Record<number, string> = {
   1: '#22c55e',
   2: TailwindColors.blue['400'],
   3: '#f97316',
   4: TailwindColors.red['500'],
+}
+
+const weatherEmoji: Record<number, string> = {
+  1: '☀️',
+  2: '🌤️',
+  3: '⛅',
+  4: '🌥️',
+  5: '☁️',
+  6: '☁️',
+  7: '🌫️',
+  8: '🌦️',
+  9: '🌦️',
+  10: '🌧️',
+  11: '⛈️',
+  12: '🌨️',
+  13: '🌨️',
+  14: '🌨️',
+  15: '🌨️',
+  16: '❄️',
+  17: '❄️',
+  18: '🌧️',
+  19: '🌧️',
+  20: '🌧️',
+  21: '⛈️',
+  22: '🌨️',
+  23: '🌨️',
+  24: '🌨️',
+  25: '❄️',
+  26: '❄️',
+  27: '❄️',
+}
+
+function getCurrentForecast(timeSeries: SmhiForecast['timeSeries']) {
+  const now = Date.now()
+  return (
+    timeSeries.find((ts) => new Date(ts.time).getTime() >= now) ??
+    timeSeries[0] ??
+    null
+  )
 }
 
 function formatSeasonDate(iso: string): string {
@@ -32,19 +70,27 @@ export default function SpotDetailPanel() {
   const { data } = useBathingWaters()
   const { bottom } = useSafeAreaInsets()
 
-  const translateY = useRef(new Animated.Value(PANEL_HEIGHT)).current
+  const translateY = useRef(new Animated.Value(PANEL_OFFSET)).current
 
   useEffect(() => {
     Animated.spring(translateY, {
-      toValue: selectedBathingWater ? 0 : PANEL_HEIGHT,
+      toValue: selectedBathingWater ? 0 : PANEL_OFFSET,
       useNativeDriver: true,
       bounciness: 4,
     }).start()
   }, [selectedBathingWater])
 
+  const spotLat = selectedBathingWater
+    ? parseFloat(selectedBathingWater.samplingPointPosition.latitude)
+    : null
+  const spotLon = selectedBathingWater
+    ? parseFloat(selectedBathingWater.samplingPointPosition.longitude)
+    : null
+
   const { data: profile } = useBathingWaterProfile(
     selectedBathingWater?.id ?? ''
   )
+  const { data: forecast } = useSmhiForecast(spotLat, spotLon)
 
   const advisory = data?.watersAndAdvisories.find(
     (w) => w.bathingWater.id === selectedBathingWater?.id
@@ -53,6 +99,14 @@ export default function SpotDetailPanel() {
   const latestClassification = profile?.lastFourClassifications
     ?.slice()
     .sort((a, b) => b.year - a.year)[0]
+
+  const currentForecast = forecast
+    ? getCurrentForecast(forecast.timeSeries)
+    : null
+
+  const temperature = currentForecast?.data.air_temperature ?? null
+  const windSpeed = currentForecast?.data.wind_speed ?? null
+  const symbol = currentForecast?.data.symbol_code ?? null
 
   const hasWarnings =
     (advisory?.adviceAgainstBathing?.length ?? 0) > 0 ||
@@ -64,7 +118,7 @@ export default function SpotDetailPanel() {
     <Animated.View
       style={[
         styles.container,
-        { transform: [{ translateY }], paddingBottom: bottom + 16 },
+        { transform: [{ translateY }], paddingBottom: bottom + 12 },
       ]}
     >
       <ThemedView style={styles.panel}>
@@ -74,10 +128,7 @@ export default function SpotDetailPanel() {
           <ThemedText style={styles.name} numberOfLines={1}>
             {selectedBathingWater?.name ?? ''}
           </ThemedText>
-          <TouchableOpacity
-            onPress={() => setBathingWater(null)}
-            hitSlop={12}
-          >
+          <TouchableOpacity onPress={() => setBathingWater(null)} hitSlop={12}>
             <ThemedText style={styles.closeButton}>✕</ThemedText>
           </TouchableOpacity>
         </View>
@@ -95,35 +146,54 @@ export default function SpotDetailPanel() {
           </View>
         </View>
 
-        {profile?.bathingSeason && (
-          <ThemedText style={styles.season}>
-            Säsong:{' '}
-            {formatSeasonDate(profile.bathingSeason.startsAt)}
-            {' – '}
-            {formatSeasonDate(profile.bathingSeason.endsAt)}
-          </ThemedText>
-        )}
+        <View style={styles.infoRow}>
+          <View style={styles.infoBlock}>
+            {latestClassification && (
+              <View style={styles.qualityRow}>
+                <View
+                  style={[
+                    styles.qualityDot,
+                    {
+                      backgroundColor:
+                        qualityColor[latestClassification.qualityClassId] ??
+                        TailwindColors.gray['400'],
+                    },
+                  ]}
+                />
+                <ThemedText style={styles.qualityText}>
+                  {latestClassification.qualityClassIdText}{' '}
+                  <ThemedText style={styles.subtle}>
+                    ({latestClassification.year})
+                  </ThemedText>
+                </ThemedText>
+              </View>
+            )}
 
-        {latestClassification && (
-          <View style={styles.qualityRow}>
-            <View
-              style={[
-                styles.qualityDot,
-                {
-                  backgroundColor:
-                    qualityColor[latestClassification.qualityClassId] ??
-                    TailwindColors.gray['400'],
-                },
-              ]}
-            />
-            <ThemedText style={styles.qualityText}>
-              {latestClassification.qualityClassIdText}{' '}
-              <ThemedText style={styles.qualityYear}>
-                ({latestClassification.year})
+            {profile?.bathingSeason && (
+              <ThemedText style={styles.subtle}>
+                Säsong {formatSeasonDate(profile.bathingSeason.startsAt)}
+                {' – '}
+                {formatSeasonDate(profile.bathingSeason.endsAt)}
               </ThemedText>
-            </ThemedText>
+            )}
           </View>
-        )}
+
+          {temperature !== null && (
+            <View style={styles.weatherBlock}>
+              <ThemedText style={styles.weatherEmoji}>
+                {symbol !== null ? (weatherEmoji[symbol] ?? '🌡️') : '🌡️'}
+              </ThemedText>
+              <ThemedText style={styles.weatherTemp}>
+                {Math.round(temperature)}°
+              </ThemedText>
+              {windSpeed !== null && (
+                <ThemedText style={styles.subtle}>
+                  {windSpeed.toFixed(1)} m/s
+                </ThemedText>
+              )}
+            </View>
+          )}
+        </View>
 
         {hasWarnings && (
           <View style={styles.warnings}>
@@ -196,7 +266,7 @@ const styles = StyleSheet.create({
   chips: {
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   chip: {
     backgroundColor: TailwindColors.blue['50'],
@@ -208,16 +278,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: TailwindColors.blue['700'],
   },
-  season: {
-    fontSize: 13,
-    color: TailwindColors.gray['500'],
-    marginBottom: 8,
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  infoBlock: {
+    flex: 1,
+    gap: 6,
   },
   qualityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 8,
   },
   qualityDot: {
     width: 10,
@@ -228,12 +302,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  qualityYear: {
-    fontWeight: '400',
+  subtle: {
+    fontSize: 13,
     color: TailwindColors.gray['500'],
+  },
+  weatherBlock: {
+    alignItems: 'center',
+    paddingLeft: 12,
+  },
+  weatherEmoji: {
+    fontSize: 28,
+  },
+  weatherTemp: {
+    fontSize: 22,
+    fontWeight: '600',
   },
   warnings: {
     gap: 4,
+    borderTopWidth: 1,
+    borderTopColor: TailwindColors.red['100'],
+    paddingTop: 10,
   },
   warningText: {
     fontSize: 13,

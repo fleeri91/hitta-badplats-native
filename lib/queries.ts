@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { getBathingWaterProfile, getBathingWaters } from './api'
+import { getBathingWaterProfile, getBathingWaters, getSmhiForecast } from './api'
 
 export const queryKeys = {
   bathingWaters: ['bathingWaters'],
   bathingWaterProfile: (id: string) => ['bathingWaterProfile', id],
+  smhiForecast: (lat: number, lon: number) => ['smhiForecast', lat, lon],
 }
 
 export const useBathingWaters = () => {
@@ -21,5 +22,14 @@ export const useBathingWaterProfile = (id: string) => {
     queryKey: queryKeys.bathingWaterProfile(id),
     queryFn: () => getBathingWaterProfile(id),
     enabled: !!id,
+  })
+}
+
+export const useSmhiForecast = (lat: number | null, lon: number | null) => {
+  return useQuery({
+    queryKey: queryKeys.smhiForecast(lat ?? 0, lon ?? 0),
+    queryFn: () => getSmhiForecast(lat!, lon!),
+    enabled: lat !== null && lon !== null,
+    staleTime: 1000 * 60 * 30,
   })
 }
