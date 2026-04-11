@@ -1,8 +1,8 @@
 import { MunicipalityName } from '@/constants/municipalities'
 import { BathingWater } from '@/types/BathingWater/BathingWaters'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { jsonStorage } from '@/lib/storage'
 import { create } from 'zustand'
-import { createJSONStorage, persist, PersistOptions } from 'zustand/middleware'
+import { persist, PersistOptions } from 'zustand/middleware'
 
 export type MapFilterState = {
   municipality: MunicipalityName | null
@@ -32,7 +32,7 @@ export const useMapFilterStore = create<MapFilterStore>()(
     }),
     {
       name: 'mapfilter-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: jsonStorage,
       partialize: (state: MapFilterStore): MapFilterState => ({
         ...initialState,
         municipality: state.municipality,

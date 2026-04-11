@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Location from 'expo-location'
 import { LocationObject } from 'expo-location'
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
+import { jsonStorage } from '@/lib/storage'
 
 export type GeoPosition = {
   latitude: number
@@ -66,7 +66,7 @@ export const useGeolocationStore = create<GeolocationStore>()(
     }),
     {
       name: 'geolocation-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: jsonStorage,
       partialize: (state) => ({ geolocation: state.geolocation }),
       onRehydrateStorage: () => (state, error) => {
         if (error) {

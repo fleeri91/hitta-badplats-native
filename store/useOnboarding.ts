@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { jsonStorage } from '@/lib/storage'
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 
 interface OnboardingState {
   isOnboarded: boolean
@@ -22,7 +22,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
     }),
     {
       name: 'onboarding-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: jsonStorage,
       partialize: (state) => ({ isOnboarded: state.isOnboarded }),
       onRehydrateStorage: () => (state, error) => {
         if (error) {
