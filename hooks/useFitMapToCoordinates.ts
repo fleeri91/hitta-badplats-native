@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { InteractionManager } from 'react-native'
-import MapView, { Region } from 'react-native-maps'
+import { Region } from 'react-native-maps'
 
 const DEFAULT_PADDING = {
   top: 50,
@@ -35,7 +35,7 @@ function getRegionFromCoordinates(coords: Coordinate[]): Region | null {
 }
 
 export function useFitMapToCoordinates(
-  mapRef: React.RefObject<MapView | null>,
+  mapRef: React.RefObject<any>,
   coordinates: Coordinate[],
   isMapReady: boolean,
   municipality: string | null,

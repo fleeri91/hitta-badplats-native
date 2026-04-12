@@ -15,6 +15,7 @@ function markerColor(waterTypeId: number, selected: boolean): string {
 
 type Props = {
   water: BathingWater
+  coordinate: { latitude: number; longitude: number }
   zoomLevel: number
   selected: boolean
   onSelect: (water: BathingWater) => void
@@ -22,14 +23,12 @@ type Props = {
 
 export default function BathingWaterMarker({
   water,
+  coordinate,
   zoomLevel,
   selected,
   onSelect,
 }: Props) {
-  const latitude = parseFloat(water.samplingPointPosition.latitude)
-  const longitude = parseFloat(water.samplingPointPosition.longitude)
-
-  if (isNaN(latitude) || isNaN(longitude)) return null
+  const { latitude, longitude } = coordinate
 
   const size = Math.max(16, Math.min(40, zoomLevel * 2.5))
   const outerSize = selected ? size * 1.25 : size
