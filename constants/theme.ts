@@ -11,6 +11,10 @@ export const Colors = {
     tabIconSelected: TailwindColors.sky['500'],
     inputBackground: TailwindColors.gray['100'],
     inputPlaceholder: TailwindColors.gray['400'],
+    cardBackground: TailwindColors.sky['50'],
+    cardIconBackground: TailwindColors.sky['100'],
+    surfaceBackground: '#FFFFFF',
+    surfaceBorder: TailwindColors.sky['200'],
   },
   dark: {
     text: '#ECEDEE',
@@ -21,6 +25,10 @@ export const Colors = {
     tabIconSelected: '#FFFFFF',
     inputBackground: TailwindColors.slate['800'],
     inputPlaceholder: TailwindColors.slate['500'],
+    cardBackground: TailwindColors.slate['800'],
+    cardIconBackground: TailwindColors.sky['900'],
+    surfaceBackground: TailwindColors.slate['700'],
+    surfaceBorder: TailwindColors.sky['800'],
   },
 }
 
