@@ -54,9 +54,9 @@ export default function ExploreScreen() {
       {/* Location section */}
       <View style={styles.section}>
         <ThemedText style={styles.sectionLabel}>DIN PLATS</ThemedText>
-        <View style={styles.locationCard}>
+        <View style={[styles.locationCard, { backgroundColor: Colors[colorScheme].cardBackground }]}>
           <View style={styles.locationMain}>
-            <View style={styles.locationIconWrap}>
+            <View style={[styles.locationIconWrap, { backgroundColor: Colors[colorScheme].cardIconBackground }]}>
               <FontAwesome6
                 name="location-dot"
                 size={16}
@@ -74,7 +74,14 @@ export default function ExploreScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.gpsButton, loading && styles.gpsButtonDisabled]}
+            style={[
+              styles.gpsButton,
+              {
+                backgroundColor: Colors[colorScheme].surfaceBackground,
+                borderColor: Colors[colorScheme].surfaceBorder,
+              },
+              loading && styles.gpsButtonDisabled,
+            ]}
             onPress={getCurrentLocation}
             disabled={loading}
             activeOpacity={0.8}
@@ -82,9 +89,7 @@ export default function ExploreScreen() {
             <FontAwesome6
               name="rotate"
               size={13}
-              color={
-                loading ? TailwindColors.gray['400'] : TailwindColors.sky['600']
-              }
+              color={loading ? Colors[colorScheme].inputPlaceholder : TailwindColors.sky['600']}
             />
             <ThemedText
               style={[styles.gpsLabel, loading && styles.gpsLabelDisabled]}
@@ -232,7 +237,6 @@ const styles = StyleSheet.create({
 
   // Location card
   locationCard: {
-    backgroundColor: TailwindColors.sky['50'],
     borderRadius: 16,
     padding: 16,
     gap: 14,
@@ -246,14 +250,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: TailwindColors.sky['100'],
     alignItems: 'center',
     justifyContent: 'center',
   },
   municipalityName: {
     fontSize: 18,
     fontWeight: '700',
-    color: TailwindColors.sky['900'],
   },
   municipalityLabel: {
     fontSize: 12,
@@ -265,11 +267,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 7,
-    backgroundColor: 'white',
     borderRadius: 12,
     paddingVertical: 11,
     borderWidth: 1,
-    borderColor: TailwindColors.sky['200'],
   },
   gpsButtonDisabled: {
     opacity: 0.5,

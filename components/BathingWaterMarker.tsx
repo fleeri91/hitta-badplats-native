@@ -1,4 +1,3 @@
-// components/BathingWaterMarker.tsx
 import { TailwindColors } from '@/constants/tailwindColors'
 import { BathingWater } from '@/types/BathingWater/BathingWaters'
 import { WaterTypeId } from '@/types/BathingWater/WaterType'
@@ -15,7 +14,6 @@ function markerColor(waterTypeId: number, selected: boolean): string {
 
 type Props = {
   water: BathingWater
-  coordinate: { latitude: number; longitude: number }
   zoomLevel: number
   selected: boolean
   onSelect: (water: BathingWater) => void
@@ -23,12 +21,12 @@ type Props = {
 
 export default function BathingWaterMarker({
   water,
-  coordinate,
   zoomLevel,
   selected,
   onSelect,
 }: Props) {
-  const { latitude, longitude } = coordinate
+  const latitude = parseFloat(water.samplingPointPosition.latitude)
+  const longitude = parseFloat(water.samplingPointPosition.longitude)
 
   const size = Math.max(16, Math.min(40, zoomLevel * 2.5))
   const outerSize = selected ? size * 1.25 : size
@@ -43,6 +41,7 @@ export default function BathingWaterMarker({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={() => onSelect(water)}
+      tracksViewChanges={false}
     >
       <View style={styles.container}>
         <View
