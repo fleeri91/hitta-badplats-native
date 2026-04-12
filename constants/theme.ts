@@ -9,6 +9,8 @@ export const Colors = {
     icon: TailwindColors.gray['400'],
     tabIconDefault: TailwindColors.gray['300'],
     tabIconSelected: TailwindColors.sky['500'],
+    inputBackground: TailwindColors.gray['100'],
+    inputPlaceholder: TailwindColors.gray['400'],
   },
   dark: {
     text: '#ECEDEE',
@@ -17,6 +19,8 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: '#FFFFFF',
+    inputBackground: TailwindColors.slate['800'],
+    inputPlaceholder: TailwindColors.slate['500'],
   },
 }
 

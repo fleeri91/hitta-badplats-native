@@ -98,16 +98,16 @@ export default function ExploreScreen() {
       {/* Search section */}
       <View style={styles.section}>
         <ThemedText style={styles.sectionLabel}>VÄLJ KOMMUN</ThemedText>
-        <View style={styles.searchRow}>
+        <View style={[styles.searchRow, { backgroundColor: Colors[colorScheme].inputBackground }]}>
           <FontAwesome6
             name="magnifying-glass"
             size={13}
-            color={TailwindColors.gray['400']}
+            color={Colors[colorScheme].inputPlaceholder}
           />
           <TextInput
             style={[styles.searchInput, { color: Colors[colorScheme].text }]}
             placeholder={`Sök bland ${municipalities.length} kommuner…`}
-            placeholderTextColor={TailwindColors.gray['400']}
+            placeholderTextColor={Colors[colorScheme].inputPlaceholder}
             value={search}
             onChangeText={setSearch}
             autoCorrect={false}
@@ -288,7 +288,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: TailwindColors.gray['100'],
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 11,
