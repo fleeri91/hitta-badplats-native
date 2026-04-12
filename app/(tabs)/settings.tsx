@@ -1,6 +1,8 @@
+import { ThemedText } from '@/components/themed-text'
+import { ThemedView } from '@/components/themed-view'
+import { municipalities, MunicipalityName } from '@/constants/municipalities'
 import { TailwindColors } from '@/constants/tailwindColors'
 import { Colors } from '@/constants/theme'
-import { municipalities, MunicipalityName } from '@/constants/municipalities'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useGeolocationStore } from '@/store/useGeolocation'
 import { useMapFilterStore } from '@/store/useMapFilter'
@@ -14,8 +16,6 @@ import {
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ThemedText } from '@/components/themed-text'
-import { ThemedView } from '@/components/themed-view'
 
 const sorted = [...municipalities].sort((a, b) => a.localeCompare(b, 'sv'))
 
@@ -31,7 +31,7 @@ function EmptyState({ query }: { query: string }) {
       />
       <ThemedText style={styles.emptyTitle}>Inga träffar</ThemedText>
       <ThemedText style={styles.emptySubtitle}>
-        Ingen kommun matchar "{query}"
+        Ingen kommun matchar {`"${query}2`}
       </ThemedText>
     </View>
   )
@@ -51,21 +51,6 @@ export default function ExploreScreen() {
 
   const Header = (
     <View>
-      {/* App header */}
-      <View style={[styles.appHeader, { paddingTop: top + 20 }]}>
-        <View style={styles.appTitleRow}>
-          <FontAwesome6
-            name="sun"
-            size={22}
-            color={TailwindColors.amber['400']}
-          />
-          <ThemedText style={styles.appTitle}>Sol & Bad</ThemedText>
-        </View>
-        <ThemedText style={styles.appSubtitle}>
-          Hitta din närmaste badplats
-        </ThemedText>
-      </View>
-
       {/* Location section */}
       <View style={styles.section}>
         <ThemedText style={styles.sectionLabel}>DIN PLATS</ThemedText>
@@ -145,7 +130,7 @@ export default function ExploreScreen() {
   const Footer = (
     <View style={[styles.footer, { paddingBottom: bottom + 24 }]}>
       <View style={styles.footerDivider} />
-      <ThemedText style={styles.footerText}>Sol & Bad · v1.0.0</ThemedText>
+      <ThemedText style={styles.footerText}>Hitta badplats · v1.0.0</ThemedText>
       <ThemedText style={styles.footerText}>
         Badplatser: Havs- och vattenmyndigheten
       </ThemedText>
@@ -160,6 +145,7 @@ export default function ExploreScreen() {
         keyExtractor={(item) => item}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingTop: top + 20 }}
         ListHeaderComponent={Header}
         ListFooterComponent={filtered.length > 0 ? Footer : null}
         ListEmptyComponent={
