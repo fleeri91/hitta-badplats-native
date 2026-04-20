@@ -1,5 +1,8 @@
+import OnboardingScreen from '@/components/OnboardingScreen'
 import { TailwindColors } from '@/constants/tailwindColors'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { safeStorage } from '@/lib/storage'
+import { useOnboardingStore } from '@/store/useOnboarding'
 import {
   DarkTheme,
   DefaultTheme,
@@ -11,9 +14,6 @@ import { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import 'react-native-reanimated'
-
-import { useColorScheme } from '@/hooks/use-color-scheme'
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -46,6 +46,7 @@ const LightTheme: Theme = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme()
+  const { isOnboarded, hasHydrated } = useOnboardingStore()
 
   return (
     <PersistQueryClientProvider
@@ -61,6 +62,7 @@ export default function RootLayout() {
           />
         </Stack>
         <StatusBar style="dark" />
+        {hasHydrated && !isOnboarded && <OnboardingScreen />}
       </ThemeProvider>
     </PersistQueryClientProvider>
   )
