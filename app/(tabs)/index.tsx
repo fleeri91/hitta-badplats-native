@@ -1,7 +1,8 @@
-import { StyleSheet } from 'react-native'
-import MapView, { Region } from 'react-native-maps'
+import { Platform, StyleSheet } from 'react-native'
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
-import BathingWaterMarker from '@/components/BathingWaterMarker'
+import { mapStyle } from '@/constants/mapStyles'
+
 import SpotDetailPanel from '@/components/SpotDetailPanel'
 import SpotListView from '@/components/SpotListView'
 import { ThemedView } from '@/components/themed-view'
@@ -19,13 +20,12 @@ import { useRef, useState } from 'react'
 export default function HomeScreen() {
   const mapRef = useRef<MapView>(null)
   const [isMapReady, setIsMapReady] = useState(false)
-  const [zoomLevel, setZoomLevel] = useState(12)
 
   const { data } = useBathingWaters()
 
   const { geolocation } = useGeolocationStore()
   const { view, setView } = useViewNavigationStore()
-  const { setBathingWater, municipality, selectedBathingWater } =
+  const { setBathingWater, municipality } =
     useMapFilterStore()
 
   useAutoMunicipality()
@@ -40,15 +40,6 @@ export default function HomeScreen() {
 
   useFitMapToCoordinates(mapRef, coordinates, isMapReady, municipality, view)
 
-  const handleRegionChangeComplete = (region: Region) => {
-    const zoom = Math.round(Math.log2(360 / region.latitudeDelta))
-    setZoomLevel(zoom)
-  }
-
-  const handleMarkerSelect = (water: BathingWater) => {
-    setBathingWater(water)
-  }
-
   const handleListSelect = (water: BathingWater) => {
     setBathingWater(water)
     setView('map')
@@ -60,10 +51,11 @@ export default function HomeScreen() {
         <>
           <MapView
             ref={mapRef}
+            provider={Platform.OS === 'ios' ? PROVIDER_GOOGLE : undefined}
+            customMapStyle={mapStyle}
             onMapReady={() => setIsMapReady(true)}
             style={StyleSheet.absoluteFillObject}
             showsUserLocation={!!geolocation}
-            onRegionChangeComplete={handleRegionChangeComplete}
             initialRegion={{
               latitude: geolocation?.coords.latitude ?? 62.0,
               longitude: geolocation?.coords.longitude ?? 15.0,
@@ -73,12 +65,13 @@ export default function HomeScreen() {
           >
             {isMapReady &&
               filteredWaters.map((water) => (
-                <BathingWaterMarker
+                <Marker
                   key={water.id}
-                  water={water}
-                  zoomLevel={zoomLevel}
-                  selected={selectedBathingWater?.id === water.id}
-                  onSelect={handleMarkerSelect}
+                  coordinate={{
+                    latitude: parseFloat(water.samplingPointPosition.latitude),
+                    longitude: parseFloat(water.samplingPointPosition.longitude),
+                  }}
+                  onPress={() => setBathingWater(water)}
                 />
               ))}
           </MapView>

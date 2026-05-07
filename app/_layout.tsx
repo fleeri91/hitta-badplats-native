@@ -1,4 +1,5 @@
 import OnboardingScreen from '@/components/OnboardingScreen'
+import { SheetProvider } from 'react-native-actions-sheet'
 import { TailwindColors } from '@/constants/tailwindColors'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { safeStorage } from '@/lib/storage'
@@ -49,21 +50,23 @@ export default function RootLayout() {
   const { isOnboarded, hasHydrated } = useOnboardingStore()
 
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister: asyncStoragePersister }}
-    >
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: 'modal', title: 'Modal' }}
-          />
-        </Stack>
-        <StatusBar style="dark" />
-        {hasHydrated && !isOnboarded && <OnboardingScreen />}
-      </ThemeProvider>
-    </PersistQueryClientProvider>
+    <SheetProvider>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister: asyncStoragePersister }}
+      >
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: 'modal', title: 'Modal' }}
+            />
+          </Stack>
+          <StatusBar style="dark" />
+          {hasHydrated && !isOnboarded && <OnboardingScreen />}
+        </ThemeProvider>
+      </PersistQueryClientProvider>
+    </SheetProvider>
   )
 }

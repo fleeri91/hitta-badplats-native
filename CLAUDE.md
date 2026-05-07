@@ -2,7 +2,7 @@
 
 ## WHAT (Project Overview)
 
-Sol & Bad is a web application that helps users quickly find sunny swimming spots nearby.
+Hitta badplats is a mobile application that helps users quickly find swimming spots nearby.
 
 Tech stack:
 

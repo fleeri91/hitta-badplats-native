@@ -9,19 +9,9 @@ import { SmhiForecast } from '@/types/Smhi/SmhiForecast'
 import { WaterTypeId } from '@/types/BathingWater/WaterType'
 import { useEffect, useRef } from 'react'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
-import {
-  Animated,
-  Linking,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Linking, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
+import ActionSheet, { ActionSheetRef, ScrollView } from 'react-native-actions-sheet'
 import { ThemedText } from './themed-text'
-import { ThemedView } from './themed-view'
-
-const PANEL_OFFSET = 500
 
 const qualityColor: Record<number, string> = {
   1: '#22c55e',
@@ -62,27 +52,12 @@ const weatherEmoji: Record<number, string> = {
 
 const TRANSPORT_MODES = [
   { label: 'Bil', icon: 'car-side' as const, iosDirFlg: 'd', googleMode: 'd' },
-  {
-    label: 'Gång',
-    icon: 'person-walking' as const,
-    iosDirFlg: 'w',
-    googleMode: 'w',
-  },
-  {
-    label: 'Cykel',
-    icon: 'person-biking' as const,
-    iosDirFlg: 'b',
-    googleMode: 'b',
-  },
+  { label: 'Gång', icon: 'person-walking' as const, iosDirFlg: 'w', googleMode: 'w' },
+  { label: 'Cykel', icon: 'person-biking' as const, iosDirFlg: 'b', googleMode: 'b' },
   { label: 'Buss', icon: 'bus' as const, iosDirFlg: 'r', googleMode: 'r' },
 ]
 
-function openDirections(
-  lat: number,
-  lon: number,
-  iosDirFlg: string,
-  googleMode: string
-) {
+function openDirections(lat: number, lon: number, iosDirFlg: string, googleMode: string) {
   const url = Platform.select({
     ios: `maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=${iosDirFlg}`,
     default: `https://maps.google.com/maps?daddr=${lat},${lon}&dirflg=${googleMode}`,
@@ -100,10 +75,7 @@ function getCurrentForecast(timeSeries: SmhiForecast['timeSeries']) {
 }
 
 function formatSeasonDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('sv-SE', {
-    day: 'numeric',
-    month: 'short',
-  })
+  return new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
 }
 
 function waterAccentColor(waterTypeId: number): string {
@@ -121,16 +93,14 @@ function waterAccentBg(waterTypeId: number): string {
 export default function SpotDetailPanel() {
   const { selectedBathingWater, setBathingWater } = useMapFilterStore()
   const { data } = useBathingWaters()
-  const { bottom } = useSafeAreaInsets()
-
-  const translateY = useRef(new Animated.Value(PANEL_OFFSET)).current
+  const sheetRef = useRef<ActionSheetRef>(null)
 
   useEffect(() => {
-    Animated.spring(translateY, {
-      toValue: selectedBathingWater ? 0 : PANEL_OFFSET,
-      useNativeDriver: true,
-      bounciness: 4,
-    }).start()
+    if (selectedBathingWater) {
+      sheetRef.current?.show()
+    } else {
+      sheetRef.current?.hide()
+    }
   }, [selectedBathingWater])
 
   const spotLat = selectedBathingWater
@@ -140,9 +110,7 @@ export default function SpotDetailPanel() {
     ? parseFloat(selectedBathingWater.samplingPointPosition.longitude)
     : null
 
-  const { data: profile } = useBathingWaterProfile(
-    selectedBathingWater?.id ?? ''
-  )
+  const { data: profile } = useBathingWaterProfile(selectedBathingWater?.id ?? '')
   const { data: forecast } = useSmhiForecast(spotLat, spotLon)
 
   const advisory = data?.watersAndAdvisories.find(
@@ -153,10 +121,7 @@ export default function SpotDetailPanel() {
     ?.slice()
     .sort((a, b) => b.year - a.year)[0]
 
-  const currentForecast = forecast
-    ? getCurrentForecast(forecast.timeSeries)
-    : null
-
+  const currentForecast = forecast ? getCurrentForecast(forecast.timeSeries) : null
   const temperature = currentForecast?.data.air_temperature ?? null
   const windSpeed = currentForecast?.data.wind_speed ?? null
   const symbol = currentForecast?.data.symbol_code ?? null
@@ -175,15 +140,15 @@ export default function SpotDetailPanel() {
     : TailwindColors.sky['50']
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        { transform: [{ translateY }], paddingBottom: bottom + 12 },
-      ]}
+    <ActionSheet
+      ref={sheetRef}
+      onClose={() => setBathingWater(null)}
+      gestureEnabled
+      defaultOverlayOpacity={0.3}
+      containerStyle={styles.container}
+      indicatorStyle={styles.indicator}
     >
-      <ThemedView style={styles.panel}>
-        <View style={styles.handle} />
-
+      <ScrollView contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -198,11 +163,7 @@ export default function SpotDetailPanel() {
             </ThemedText>
           </View>
           <TouchableOpacity onPress={() => setBathingWater(null)} hitSlop={12}>
-            <FontAwesome6
-              name="xmark"
-              size={16}
-              color={TailwindColors.gray['400']}
-            />
+            <FontAwesome6 name="xmark" size={16} color={TailwindColors.gray['400']} />
           </TouchableOpacity>
         </View>
 
@@ -275,14 +236,8 @@ export default function SpotDetailPanel() {
             </View>
             {windSpeed !== null && (
               <View style={styles.windBlock}>
-                <FontAwesome6
-                  name="wind"
-                  size={12}
-                  color={TailwindColors.gray['400']}
-                />
-                <ThemedText style={styles.windText}>
-                  {windSpeed.toFixed(1)} m/s
-                </ThemedText>
+                <FontAwesome6 name="wind" size={12} color={TailwindColors.gray['400']} />
+                <ThemedText style={styles.windText}>{windSpeed.toFixed(1)} m/s</ThemedText>
               </View>
             )}
           </View>
@@ -295,24 +250,11 @@ export default function SpotDetailPanel() {
               <TouchableOpacity
                 key={mode.label}
                 style={styles.directionButton}
-                onPress={() =>
-                  openDirections(
-                    spotLat,
-                    spotLon,
-                    mode.iosDirFlg,
-                    mode.googleMode
-                  )
-                }
+                onPress={() => openDirections(spotLat, spotLon, mode.iosDirFlg, mode.googleMode)}
                 activeOpacity={0.7}
               >
-                <FontAwesome6
-                  name={mode.icon}
-                  size={16}
-                  color={TailwindColors.gray['600']}
-                />
-                <ThemedText style={styles.directionLabel}>
-                  {mode.label}
-                </ThemedText>
+                <FontAwesome6 name={mode.icon} size={16} color={TailwindColors.gray['600']} />
+                <ThemedText style={styles.directionLabel}>{mode.label}</ThemedText>
               </TouchableOpacity>
             ))}
           </View>
@@ -323,99 +265,59 @@ export default function SpotDetailPanel() {
           <View style={styles.warnings}>
             {advisory?.adviceAgainstBathing?.map((a) => (
               <View key={a.typeIdText} style={styles.warningRow}>
-                <FontAwesome6
-                  name="triangle-exclamation"
-                  size={12}
-                  color={TailwindColors.red['500']}
-                />
-                <ThemedText style={styles.warningText}>
-                  {a.typeIdText}
-                </ThemedText>
+                <FontAwesome6 name="triangle-exclamation" size={12} color={TailwindColors.red['500']} />
+                <ThemedText style={styles.warningText}>{a.typeIdText}</ThemedText>
               </View>
             ))}
             {advisory?.abnormalSituations?.map((a) => (
               <View key={a.description} style={styles.warningRow}>
-                <FontAwesome6
-                  name="triangle-exclamation"
-                  size={12}
-                  color={TailwindColors.red['500']}
-                />
-                <ThemedText style={styles.warningText}>
-                  {a.description}
-                </ThemedText>
+                <FontAwesome6 name="triangle-exclamation" size={12} color={TailwindColors.red['500']} />
+                <ThemedText style={styles.warningText}>{a.description}</ThemedText>
               </View>
             ))}
             {profile?.algae && (
               <View style={styles.warningRow}>
-                <FontAwesome6
-                  name="triangle-exclamation"
-                  size={12}
-                  color={TailwindColors.amber['500']}
-                />
-                <ThemedText
-                  style={[
-                    styles.warningText,
-                    { color: TailwindColors.amber['700'] },
-                  ]}
-                >
+                <FontAwesome6 name="triangle-exclamation" size={12} color={TailwindColors.amber['500']} />
+                <ThemedText style={[styles.warningText, { color: TailwindColors.amber['700'] }]}>
                   Alger
                 </ThemedText>
               </View>
             )}
             {profile?.cyano && (
               <View style={styles.warningRow}>
-                <FontAwesome6
-                  name="triangle-exclamation"
-                  size={12}
-                  color={TailwindColors.amber['500']}
-                />
-                <ThemedText
-                  style={[
-                    styles.warningText,
-                    { color: TailwindColors.amber['700'] },
-                  ]}
-                >
+                <FontAwesome6 name="triangle-exclamation" size={12} color={TailwindColors.amber['500']} />
+                <ThemedText style={[styles.warningText, { color: TailwindColors.amber['700'] }]}>
                   Cyanobakterier
                 </ThemedText>
               </View>
             )}
           </View>
         )}
-      </ThemedView>
-    </Animated.View>
+      </ScrollView>
+    </ActionSheet>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 0,
   },
-  panel: {
-    marginHorizontal: 12,
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-  handle: {
+  indicator: {
+    backgroundColor: TailwindColors.gray['300'],
     width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: TailwindColors.gray['200'],
-    alignSelf: 'center',
-    marginBottom: 14,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 10,
+    paddingTop: 4,
   },
   headerLeft: {
     flexDirection: 'row',
