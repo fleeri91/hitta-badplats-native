@@ -25,8 +25,7 @@ export default function HomeScreen() {
 
   const { geolocation } = useGeolocationStore()
   const { view, setView } = useViewNavigationStore()
-  const { setBathingWater, municipality } =
-    useMapFilterStore()
+  const { setBathingWater, municipality } = useMapFilterStore()
 
   useAutoMunicipality()
 
@@ -69,7 +68,9 @@ export default function HomeScreen() {
                   key={water.id}
                   coordinate={{
                     latitude: parseFloat(water.samplingPointPosition.latitude),
-                    longitude: parseFloat(water.samplingPointPosition.longitude),
+                    longitude: parseFloat(
+                      water.samplingPointPosition.longitude
+                    ),
                   }}
                   onPress={() => setBathingWater(water)}
                 />
